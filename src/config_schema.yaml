@@ -1,9 +1,9 @@
 # Configuration options for the Whisper models
 model_options:
   use_api:
-    value: false
+    value: true
     type: bool
-    description: "Toggle to choose whether to use the OpenAI API or a local Whisper model for transcription."
+    description: "Toggle to choose whether to use a hosted transcription API (see the api section for provider) or a local Whisper model for transcription."
 
   # Common configuration options for both API and local models
   common:
@@ -20,20 +20,28 @@ model_options:
       type: str
       description: "A string used as an initial prompt to condition the transcription. More info: https://platform.openai.com/docs/guides/speech-to-text/prompting"
 
-  # Configuration options for the OpenAI API
+  # Configuration options for the hosted transcription API
   api:
+    provider:
+      value: groq
+      type: str
+      description: "Which API provider to use for transcription. 'groq' uses Groq's hosted Whisper Large V3 Turbo (fast, generous free tier — get a key at console.groq.com). 'openrouter' routes the same model through OpenRouter (pay-per-second, no free tier — useful if you already bill other models through OpenRouter). 'custom' lets you point base_url/model at OpenAI or any other OpenAI-compatible endpoint."
+      options:
+        - groq
+        - openrouter
+        - custom
     model:
-      value: whisper-1
+      value: null
       type: str
-      description: "The model to use for transcription. Currently only 'whisper-1' is available."
+      description: "Model name to send to the provider. Leave blank to use the provider's default (groq: whisper-large-v3-turbo, openrouter: openai/whisper-large-v3-turbo). Required when provider is 'custom' (e.g. whisper-1 for OpenAI)."
     base_url:
-      value: https://api.openai.com/v1
+      value: null
       type: str
-      description: "The base URL for the API. Can be changed to use a local API endpoint."
+      description: "Custom API base URL. Only used when provider is 'custom' — ignored for 'groq' and 'openrouter', which use fixed endpoints."
     api_key:
       value: null
       type: str
-      description: "Your API key for the OpenAI API. Required for non-local API usage."
+      description: "API key for the selected provider. On save, this is written to .env as GROQ_API_KEY, OPENROUTER_API_KEY, or OPENAI_API_KEY (matching the provider chosen above) and this field is cleared."
 
   # Configuration options for the faster-whisper model
   local:

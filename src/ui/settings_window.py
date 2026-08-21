@@ -13,6 +13,13 @@ from utils import ConfigManager
 
 load_dotenv()
 
+# Must match the provider -> env var mapping in src/transcription.py's API_PROVIDER_PRESETS
+PROVIDER_ENV_VARS = {
+    'groq': 'GROQ_API_KEY',
+    'openrouter': 'OPENROUTER_API_KEY',
+    'custom': 'OPENAI_API_KEY',
+}
+
 class SettingsWindow(BaseWindow):
     settings_closed = pyqtSignal()
     settings_saved = pyqtSignal()
@@ -135,7 +142,9 @@ class SettingsWindow(BaseWindow):
         widget = QLineEdit(value)
         if key == 'api_key':
             widget.setEchoMode(QLineEdit.Password)
-            widget.setText(os.getenv('OPENAI_API_KEY') or value)
+            provider = ConfigManager.get_config_value('model_options', 'api', 'provider') or 'custom'
+            env_var = PROVIDER_ENV_VARS.get(provider, 'OPENAI_API_KEY')
+            widget.setText(os.getenv(env_var) or value)
         elif key == 'model_path':
             layout = QHBoxLayout()
             layout.addWidget(widget)
@@ -176,10 +185,13 @@ class SettingsWindow(BaseWindow):
         """Save the settings to the config file and .env file."""
         self.iterate_settings(self.save_setting)
 
-        # Save the API key to the .env file
+        # Save the API key to the .env file, under the var matching the selected provider
         api_key = ConfigManager.get_config_value('model_options', 'api', 'api_key') or ''
-        set_key('.env', 'OPENAI_API_KEY', api_key)
-        os.environ['OPENAI_API_KEY'] = api_key
+        if api_key:
+            provider = ConfigManager.get_config_value('model_options', 'api', 'provider') or 'custom'
+            env_var = PROVIDER_ENV_VARS.get(provider, 'OPENAI_API_KEY')
+            set_key('.env', env_var, api_key)
+            os.environ[env_var] = api_key
 
         # Remove the API key from the config
         ConfigManager.set_config_value(None, 'model_options', 'api', 'api_key')

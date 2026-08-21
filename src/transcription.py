@@ -63,14 +63,43 @@ def transcribe_local(audio_data, local_model=None):
                                       vad_filter=model_options['local']['vad_filter'],)
     return ''.join([segment.text for segment in list(response[0])])
 
+# Presets for the built-in API providers. 'custom' has no fixed base_url/model:
+# those come from config so 'custom' can point at OpenAI or any compatible endpoint.
+API_PROVIDER_PRESETS = {
+    'groq': {
+        'base_url': 'https://api.groq.com/openai/v1',
+        'model': 'whisper-large-v3-turbo',
+        'env_var': 'GROQ_API_KEY',
+    },
+    'openrouter': {
+        'base_url': 'https://openrouter.ai/api/v1',
+        'model': 'openai/whisper-large-v3-turbo',
+        'env_var': 'OPENROUTER_API_KEY',
+    },
+    'custom': {
+        'env_var': 'OPENAI_API_KEY',
+    },
+}
+
 def transcribe_api(audio_data):
     """
-    Transcribe an audio file using the OpenAI API.
+    Transcribe an audio file using a hosted API (Groq, OpenRouter, or a custom
+    OpenAI-compatible endpoint), depending on model_options.api.provider.
     """
     model_options = ConfigManager.get_config_section('model_options')
+    api_options = model_options['api']
+    preset = API_PROVIDER_PRESETS.get(api_options.get('provider'), API_PROVIDER_PRESETS['custom'])
+
+    base_url = preset.get('base_url') or api_options.get('base_url') or 'https://api.openai.com/v1'
+    model = api_options.get('model') or preset.get('model') or 'whisper-1'
+    api_key_present = bool(os.getenv(preset['env_var']))
+    ConfigManager.console_print(
+        f"Transcribing via API — provider: {api_options.get('provider')}, model: {model}, "
+        f"base_url: {base_url}, {preset['env_var']} set: {api_key_present}"
+    )
     client = OpenAI(
-        api_key=os.getenv('OPENAI_API_KEY') or None,
-        base_url=model_options['api']['base_url'] or 'https://api.openai.com/v1'
+        api_key=os.getenv(preset['env_var']) or None,
+        base_url=base_url
     )
 
     # Convert numpy array to WAV file
@@ -80,7 +109,7 @@ def transcribe_api(audio_data):
     byte_io.seek(0)
 
     response = client.audio.transcriptions.create(
-        model=model_options['api']['model'],
+        model=model,
         file=('audio.wav', byte_io, 'audio/wav'),
         language=model_options['common']['language'],
         prompt=model_options['common']['initial_prompt'],
