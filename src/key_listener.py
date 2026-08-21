@@ -885,6 +885,36 @@ class PynputBackend(InputBackend):
             self.keyboard.KeyCode.from_char('y'): KeyCode.Y,
             self.keyboard.KeyCode.from_char('z'): KeyCode.Z,
 
+            # Ctrl+letter control characters (Windows reports Key.ctrl + a
+            # letter as a control char like '\x13' for Ctrl+S, not the
+            # literal letter, so those need their own map entries)
+            self.keyboard.KeyCode.from_char(chr(1)): KeyCode.A,
+            self.keyboard.KeyCode.from_char(chr(2)): KeyCode.B,
+            self.keyboard.KeyCode.from_char(chr(3)): KeyCode.C,
+            self.keyboard.KeyCode.from_char(chr(4)): KeyCode.D,
+            self.keyboard.KeyCode.from_char(chr(5)): KeyCode.E,
+            self.keyboard.KeyCode.from_char(chr(6)): KeyCode.F,
+            self.keyboard.KeyCode.from_char(chr(7)): KeyCode.G,
+            self.keyboard.KeyCode.from_char(chr(8)): KeyCode.H,
+            self.keyboard.KeyCode.from_char(chr(9)): KeyCode.I,
+            self.keyboard.KeyCode.from_char(chr(10)): KeyCode.J,
+            self.keyboard.KeyCode.from_char(chr(11)): KeyCode.K,
+            self.keyboard.KeyCode.from_char(chr(12)): KeyCode.L,
+            self.keyboard.KeyCode.from_char(chr(13)): KeyCode.M,
+            self.keyboard.KeyCode.from_char(chr(14)): KeyCode.N,
+            self.keyboard.KeyCode.from_char(chr(15)): KeyCode.O,
+            self.keyboard.KeyCode.from_char(chr(16)): KeyCode.P,
+            self.keyboard.KeyCode.from_char(chr(17)): KeyCode.Q,
+            self.keyboard.KeyCode.from_char(chr(18)): KeyCode.R,
+            self.keyboard.KeyCode.from_char(chr(19)): KeyCode.S,
+            self.keyboard.KeyCode.from_char(chr(20)): KeyCode.T,
+            self.keyboard.KeyCode.from_char(chr(21)): KeyCode.U,
+            self.keyboard.KeyCode.from_char(chr(22)): KeyCode.V,
+            self.keyboard.KeyCode.from_char(chr(23)): KeyCode.W,
+            self.keyboard.KeyCode.from_char(chr(24)): KeyCode.X,
+            self.keyboard.KeyCode.from_char(chr(25)): KeyCode.Y,
+            self.keyboard.KeyCode.from_char(chr(26)): KeyCode.Z,
+
             # Special keys
             self.keyboard.Key.space: KeyCode.SPACE,
             self.keyboard.Key.enter: KeyCode.ENTER,
